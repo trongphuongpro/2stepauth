@@ -110,11 +110,11 @@ class ActivationDialog(QDialog):
         try:
             res = put(f"http://localhost:5000/api/uid/{self.userinfo['username']}").json()
 
-            if res["status"] is True:
-                res = post(f"http://localhost:5000/api/uid", data={"cardid":6969}).json()
-                print(res)
-            else:
-                self.status_text.setText("Invalid username")
+            if res["status"] is False:
+                messagebox = QMessageBox(self)
+                messagebox.setText("Invalid username")
+                messagebox.exec()
+
         except:
             self.status_text.setText("Disconnected to server")
         else:
