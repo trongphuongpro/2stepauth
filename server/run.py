@@ -1,5 +1,5 @@
 from app import application
-from app.api import create_api
+from app.resourse import create_api
 
 create_api()
 

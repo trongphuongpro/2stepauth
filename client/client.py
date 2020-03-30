@@ -46,7 +46,6 @@ class RegisterDialog(QDialog):
             try:
                 res = post("http://localhost:5000/api/user", data={"username":self.userinfo["username"]}).json()
                 self.userinfo["userinfo"] = list(res.keys())[0]
-                print(f"[userid] {res}")
 
             except:
                 self.status_text.setText("Disconnected to server")
@@ -74,6 +73,54 @@ class RegisterDialog(QDialog):
             self.validUsername = False
 
 
+class ActivationDialog(QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.userinfo = {'username': None, 'userid': None}
+
+        self.setWindowTitle("Activate new card")
+
+        buttons = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        buttonBox = QDialogButtonBox(buttons)
+        buttonBox.accepted.connect(self.sendActivationRequest)
+        buttonBox.rejected.connect(self.reject)
+
+        self.status_text = QLabel()
+
+        username_field = QLineEdit()
+        username_field.setMaxLength(20)
+        username_field.setPlaceholderText("Enter your username")
+        username_field.textChanged.connect(self.getUsername)
+
+        layout = QVBoxLayout()
+        layout.addWidget(username_field)
+        layout.addWidget(self.status_text)
+        layout.addWidget(buttonBox)
+
+        self.setLayout(layout)
+
+
+    def getUsername(self, text):
+        self.userinfo['username'] = text
+
+
+    def sendActivationRequest(self):
+        try:
+            res = put(f"http://localhost:5000/api/uid/{self.userinfo['username']}").json()
+
+            if res["status"] is True:
+                res = post(f"http://localhost:5000/api/uid", data={"cardid":6969}).json()
+                print(res)
+            else:
+                self.status_text.setText("Invalid username")
+        except:
+            self.status_text.setText("Disconnected to server")
+        else:
+            self.accept()
+
+
 class ClientApp(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -94,12 +141,17 @@ class ClientApp(QMainWindow):
         register_button = QPushButton("Register new card")
         register_button.clicked.connect(self.register_button_callback)
 
+        activation_button = QPushButton("Activate new card")
+        activation_button.clicked.connect(self.activation_button_callback)
+
+
         #statusbar = QStatusBar()
 
         layout = QVBoxLayout()
         layout.addWidget(text)
         layout.addWidget(password)
         layout.addWidget(register_button)
+        layout.addWidget(activation_button)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -111,6 +163,11 @@ class ClientApp(QMainWindow):
     def register_button_callback(self):
         register_dialog = RegisterDialog(self)
         register_dialog.exec()
+
+
+    def activation_button_callback(self):
+        activation_dialog = ActivationDialog(self)
+        activation_dialog.exec()
 
 
 app = QApplication(sys.argv)
