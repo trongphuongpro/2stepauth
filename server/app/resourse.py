@@ -1,8 +1,8 @@
 from flask_restful import Resource, reqparse
 import hashlib
-from app.models import User
-from app import database
-from app import routes
+from .models import User
+from . import database
+from . import routes
 
 # initialize database and tables
 database.create_all()
