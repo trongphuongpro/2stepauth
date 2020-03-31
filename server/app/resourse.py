@@ -46,15 +46,19 @@ class UserCardIdAPI(Resource):
         self.parser.add_argument('cardid', type=int, required=True)
 
 
-    def put(self, username):
+    def put(self, username=None):
         global currentUser
 
-        currentUser = User.query.filter_by(username=username).first()
-        print(f"currentUser: {currentUser}")
-        if currentUser:
-            return {"status": True}
+        if username is None:
+            currentUser = None
+            return True
         else:
-            return {"status": False}
+            currentUser = User.query.filter_by(username=username).first()
+            print(f"currentUser: {currentUser}")
+            if currentUser:
+                return True
+            else:
+                return False
 
 
     def post(self):
@@ -62,16 +66,21 @@ class UserCardIdAPI(Resource):
         print(f"currentUser: {currentUser}")
 
         if currentUser:
-            args = self.parser.parse_args()
+            try:
+                args = self.parser.parse_args()
 
-            currentUser.cardid = args['cardid']
-            database.session.add(currentUser)
-            database.session.commit()
-            currentUser = None
+                currentUser.cardid = args['cardid']
+                database.session.add(currentUser)
+                database.session.commit()
+                currentUser = None
+                
+            except:
+                currentUser = None
+                return False
+            
+            return True
 
-            return {"status": True}
-
-        return {"status": False}
+        return False
 
 
 class UserCheckingAPI(Resource):
@@ -81,9 +90,9 @@ class UserCheckingAPI(Resource):
         result = User.query.filter_by(userid=uid).first()
 
         if result is None:
-            return {"status": True}
+            return True
 
-        return {"status": False}
+        return False
 
 
     @classmethod

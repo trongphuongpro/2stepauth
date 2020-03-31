@@ -60,7 +60,7 @@ class RegisterDialog(QDialog):
         if username:
             try:
                 res = get(f"http://localhost:5000/api/checking/{username}").json()
-                if (res["status"] is True):
+                if (res is True):
                     self.validUsername = True
                     self.status_text.setText("You can use this username")
                 else:
@@ -110,7 +110,7 @@ class ActivationDialog(QDialog):
         try:
             res = put(f"http://localhost:5000/api/uid/{self.userinfo['username']}").json()
 
-            if res["status"] is False:
+            if res is False:
                 messagebox = QMessageBox(self)
                 messagebox.setText("Invalid username")
                 messagebox.exec()
