@@ -1,4 +1,6 @@
 *sublime*
 __pycache__/
 *.db
-test*
+bin/
+build/
+test/
