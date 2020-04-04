@@ -5,6 +5,7 @@ from requests import get, put, post
 import sys
 import json
 
+URL = "http://192.168.0.114:5000"
 
 class RegisterDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -44,7 +45,7 @@ class RegisterDialog(QDialog):
     def sendRegisterRequest(self):
         if self.validUsername:
             try:
-                res = post("http://localhost:5000/api/user", data={"username":self.userinfo["username"]}).json()
+                res = post(f"{URL}/api/user", data={"username":self.userinfo["username"]}).json()
                 self.userinfo["userinfo"] = list(res.keys())[0]
 
             except:
@@ -59,7 +60,7 @@ class RegisterDialog(QDialog):
     def checkUsername(self, username):
         if username:
             try:
-                res = get(f"http://localhost:5000/api/checking/{username}").json()
+                res = get(f"{URL}/api/checking/{username}").json()
                 if (res is True):
                     self.validUsername = True
                     self.status_text.setText("You can use this username")
@@ -108,7 +109,7 @@ class ActivationDialog(QDialog):
 
     def sendActivationRequest(self):
         try:
-            res = put(f"http://localhost:5000/api/uid/{self.userinfo['username']}").json()
+            res = put(f"{URL}/api/uid/{self.userinfo['username']}").json()
 
             if res is False:
                 messagebox = QMessageBox(self)

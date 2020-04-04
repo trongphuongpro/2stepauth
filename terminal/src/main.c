@@ -83,11 +83,10 @@ int main() {
 						/* RST port = */ GPIO_PORTB_BASE, 
 						/* RST pin = */ GPIO_PIN_0);
 
-	MessageBox_t inbox;
+	
     Message_t data[8];
-    Message_t pkg;
-
-	uart_messagebox_create(UART1_BASE, &inbox, data, 8);
+    Message_t msg;
+    MessageBox_p inbox = uart_messagebox_create(UART1_BASE, data, 8);
 
 	//  Enable Global Interrupts
     IntMasterEnable();
@@ -116,14 +115,14 @@ int main() {
 			message_send(preamble, 1, 2, uid.UID, uid.size);
 		}
 
-		if (messagebox_isAvailable(&inbox)) {
-			messagebox_pop(&inbox, &pkg);
+		if (messagebox_isAvailable(inbox)) {
+			messagebox_pop(inbox, &msg);
 
-            UARTprintf("\n[Address] %d", pkg.address);
-            UARTprintf("\n[Size] %d", pkg.payloadSize);
+            UARTprintf("\n[Address] %d", msg.address);
+            UARTprintf("\n[Size] %d", msg.payloadSize);
             UARTprintf("\n[Payload] ");
-            for (int i = 0; i < pkg.payloadSize; i++) {
-                UARTprintf("%c", pkg.payload[i]);
+            for (int i = 0; i < msg.payloadSize; i++) {
+                UARTprintf("%c", msg.payload[i]);
             }
 
             UARTprintf("\n-----------------------------");
