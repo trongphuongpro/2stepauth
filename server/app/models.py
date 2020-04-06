@@ -9,3 +9,7 @@ class User(database.Model):
 
     def __repr__(self):
         return f'<User {self.username!r}>'
+
+
+    def getInfo(self):
+        return self.username

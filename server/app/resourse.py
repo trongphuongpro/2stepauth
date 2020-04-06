@@ -55,6 +55,7 @@ class UserCardIdAPI(Resource):
         else:
             currentUser = User.query.filter_by(username=username).first()
             print(f"currentUser: {currentUser}")
+
             if currentUser:
                 return True
             else:
@@ -73,18 +74,36 @@ class UserCardIdAPI(Resource):
                 database.session.add(currentUser)
                 database.session.commit()
                 currentUser = None
-                
+                return 1
+
+            except Exception as e:
+                print(f"Error: {e}")
+
+                currentUser = None
+                return 0
+        else:
+            try:
+                args = self.parser.parse_args()
+
+                result = User.query.filter_by(cardid=args['cardid']).first()
+
+                if result is None:
+                    return 0
+                else:
+                    return result.getInfo()
+            
             except Exception as e:
                 print(e)
-                currentUser = None
-                return False
-            
-            return True
-
-        return False
+                return 0
 
 
 class UserCheckingAPI(Resource):
+    def __init__(self):
+        super().__init__()
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument('cardid', type=int, required=True)
+
+
     def get(self, username):
         uid = self.create_userid(username)
 
@@ -95,6 +114,10 @@ class UserCheckingAPI(Resource):
 
         return False
 
+
+    def put(self):
+        pass
+        
 
     @classmethod
     def create_userid(self, username):

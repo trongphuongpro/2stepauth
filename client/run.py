@@ -5,7 +5,7 @@ from requests import get, put, post
 import sys
 import json
 
-URL = "http://192.168.0.114:5000"
+URL = "http://192.168.0.99:5000"
 
 class RegisterDialog(QDialog):
     def __init__(self, *args, **kwargs):

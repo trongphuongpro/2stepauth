@@ -11,13 +11,15 @@ using namespace BBB;
 
 uint8_t preamble[4] = {0xAA, 0xBB, 0xCC, 0xDD};
 char data[30];
+string response;
 
 char **generateArgs(const char *name,
                     const char *url,
                     const char *data, 
                     const char *method);
-
 void deleteArgs(char **args);
+void request(char **args, string &message);
+
 
 int main(int argc, const char** argv) {
     UART bus(UART::UART1, B9600);
@@ -46,62 +48,20 @@ int main(int argc, const char** argv) {
                                                       packet.payload[2],
                                                       packet.payload[3]);
 
+            // Add new card id to database
             char **args = generateArgs("curl",
-                                "192.168.0.114:5000/api/uid",
+                                "192.168.0.99:5000/api/uid",
                                 data, 
                                 "POST");
 
-
-            for (int i = 0; i < 7; i++) {
-                printf("%s\n", args[i]);
-            }
-
-
             puts("Done");
 
-            int fd[2];
-            if (pipe(fd) == -1) {
-                perror("pipe:");
-            }
+            request(args, response);
+            cout << "Response: " << response << endl;
 
-            pid_t pid;
-            pid = fork();
 
-            if (pid == -1) {
-                perror("fork: ");
-                exit(EXIT_SUCCESS);
-            }
-
-            // in child process
-            else if (!pid) {
-                close(fd[0]);
-                dup2(fd[1], 1);
-
-                if (execve("/usr/bin/curl", args, NULL) == -1) {
-                    perror("execve: ");
-                    deleteArgs(args);
-                    exit(EXIT_SUCCESS);
-                }
-                printf("Deleting args...\n");
-                deleteArgs(args);
-                puts("Done");
-            }
-            
-            close(fd[1]);
-            dup2(fd[0], 0);
-
-            char message[30];
-
-            while (fgets(message, sizeof(message), stdin)) {
-                printf("%s\n", message);
-            }
+            usleep(50000); /**< very important */
         }
-
-        // for (uint8_t i = 0; i < 4; i++) {
-        //  printf("\nSend %d bytes", strlen(s[i]));
-        //  msg.send(preamble_1, i, i, s[i], strlen(s[i]));
-        // }
-        usleep(50000); /**< very important */
     }
 }
 
@@ -150,4 +110,40 @@ void deleteArgs(char **args) {
         index++;
     } 
     delete[] args;
+}
+
+
+void request(char **args, string &response) {
+    int fd[2];
+
+    if (pipe(fd) == -1) {
+        perror("pipe:");
+    }
+
+    pid_t pid;
+    pid = fork();
+
+    if (pid == -1) {
+        perror("fork: ");
+        exit(EXIT_SUCCESS);
+    }
+
+    // in child process
+    else if (!pid) {
+        close(fd[0]);
+        dup2(fd[1], 1);
+
+        if (execve("/usr/bin/curl", args, NULL) == -1) {
+            perror("execve: ");
+            deleteArgs(args);
+            exit(EXIT_SUCCESS);
+        }
+        deleteArgs(args);
+    }
+    
+    // in parent process
+    close(fd[1]);
+    dup2(fd[0], 0);
+
+    getline(cin, response);
 }
