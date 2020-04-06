@@ -74,7 +74,8 @@ class UserCardIdAPI(Resource):
                 database.session.commit()
                 currentUser = None
                 
-            except:
+            except Exception as e:
+                print(e)
                 currentUser = None
                 return False
             

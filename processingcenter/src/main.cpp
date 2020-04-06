@@ -24,10 +24,6 @@ int main(int argc, const char** argv) {
     MessageBox<UART> msg(bus);
     Message_t packet;
 
-    // const char* s[4] = {"Beaglebone Black", "trongphuongpro",
-    //                  "codelungtung", "uart testing"};
-
-    puts("POST testing");
 
     while (1) {
         if (msg.isAvailable()) {
@@ -45,7 +41,7 @@ int main(int argc, const char** argv) {
 
             printf("Creating args...\n");
 
-            sprintf(data, "\"cardid=%d%d%d%d\"", packet.payload[0],
+            sprintf(data, "cardid=%03d%03d%03d%03d", packet.payload[0],
                                                       packet.payload[1],
                                                       packet.payload[2],
                                                       packet.payload[3]);
@@ -54,6 +50,13 @@ int main(int argc, const char** argv) {
                                 "192.168.0.114:5000/api/uid",
                                 data, 
                                 "POST");
+
+
+            for (int i = 0; i < 7; i++) {
+                printf("%s\n", args[i]);
+            }
+
+
             puts("Done");
 
             int fd[2];
@@ -87,7 +90,6 @@ int main(int argc, const char** argv) {
             close(fd[1]);
             dup2(fd[0], 0);
 
-            printf("My child: %d\n", pid);
             char message[30];
 
             while (fgets(message, sizeof(message), stdin)) {
