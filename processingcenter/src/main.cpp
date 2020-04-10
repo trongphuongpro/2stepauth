@@ -11,14 +11,13 @@ using namespace BBB;
 
 uint8_t preamble[4] = {0xAA, 0xBB, 0xCC, 0xDD};
 char data[30];
-string response;
 
 char **generateArgs(const char *name,
                     const char *url,
                     const char *data, 
                     const char *method);
 void deleteArgs(char **args);
-void request(char **args, string &message);
+uint16_t request(char **args);
 
 
 int main(int argc, const char** argv) {
@@ -31,18 +30,16 @@ int main(int argc, const char** argv) {
         if (msg.isAvailable()) {
             msg.pop(packet);
 
-            printf("[Address] %d\n", packet.address);
+            printf("[From] %d\n", packet.address);
 
             printf("[Size] %d\n", packet.payloadSize);
         
             printf("[Payload] ");
             for (int i = 0; i < packet.payloadSize; i++) {
-                printf("%02X", packet.payload[i]);
+                printf("%02X ", packet.payload[i]);
             }
-            printf("\n----------------------\n");
-
-            printf("Creating args...\n");
-
+            printf("\n");
+            
             sprintf(data, "cardid=%03d%03d%03d%03d", packet.payload[0],
                                                       packet.payload[1],
                                                       packet.payload[2],
@@ -54,10 +51,11 @@ int main(int argc, const char** argv) {
                                 data, 
                                 "POST");
 
-            puts("Done");
+            uint16_t pwd = request(args);
+            cout << "Response: " << pwd << endl;
+            printf("----------------------\n");
 
-            request(args, response);
-            cout << "Response: " << response << endl;
+            msg.send(preamble, 1, 0, &pwd, sizeof(pwd));
 
 
             usleep(50000); /**< very important */
@@ -113,7 +111,7 @@ void deleteArgs(char **args) {
 }
 
 
-void request(char **args, string &response) {
+uint16_t request(char **args) {
     int fd[2];
 
     if (pipe(fd) == -1) {
@@ -145,5 +143,9 @@ void request(char **args, string &response) {
     close(fd[1]);
     dup2(fd[0], 0);
 
-    getline(cin, response);
+    uint16_t response;
+
+    cin >> response;
+
+    return response;
 }

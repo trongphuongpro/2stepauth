@@ -44,16 +44,24 @@ else ()
 
 	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/rfid rfid)
 	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/message message)
+	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/lcd1602 lcd1602)
+	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/keypad keypad)
+	add_subdirectory($ENV{HOME}/Work/BareMetal/libraries/tiva_utils tiva_utils)
 
 
 	add_executable(${TARGET} src/startup_gcc.c src/main.c
 							${TIVAWARE_PATH}/utils/uartstdio.c)
 
 	target_link_libraries(${TARGET} ${TIVAWARE_PATH}/driverlib/gcc/libdriver.a
-									mfrc522 message
+									mfrc522 message lcd1602 utils keypad
 	)
 
 	target_include_directories(${TARGET} PUBLIC ${TIVAWARE_PATH} 
+			$ENV{HOME}/Work/BareMetal/libraries/lcd1602/include
+			$ENV{HOME}/Work/BareMetal/libraries/tiva_utils/include
+			$ENV{HOME}/Work/BareMetal/libraries/keypad/include
+			$ENV{HOME}/Work/BareMetal/libraries/rfid/include
+			$ENV{HOME}/Work/BareMetal/libraries/message/include
 	)
 
 #-----------------------------------------------------------------------------#

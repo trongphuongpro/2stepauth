@@ -4,6 +4,8 @@ from .models import User
 from . import database
 from . import routes
 
+import numpy as np
+
 # initialize database and tables
 database.create_all()
 currentUser = None
@@ -90,7 +92,7 @@ class UserCardIdAPI(Resource):
                 if result is None:
                     return 0
                 else:
-                    return result.getInfo()
+                    return np.random.randint(1000, 9999)
             
             except Exception as e:
                 print(e)
