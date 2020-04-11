@@ -2,10 +2,32 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from requests import get, put, post
+import paho.mqtt.client as paho
 import sys
 import json
 
 URL = "http://192.168.0.99:5000"
+
+def on_message_callback(client, userdata, msg):
+    clientapp.password.setText(msg.payload.decode())
+
+def on_subscribe_callback(client, userdata, mid, granted_qos):
+    print("Subscribed: "+str(mid)+" "+str(granted_qos))
+
+def on_connect_callback(client, userdata, flags, rc):
+    print("CONNACK received with code {}.".format(rc))
+
+# initialize MQTT client
+client = paho.Client("client_app")
+
+client.on_message = on_message_callback
+client.on_subscribe = on_subscribe_callback
+client.on_connect = on_connect_callback
+
+client.connect("test.mosquitto.org", 1883)
+client.subscribe("onetimepwd", 2)
+client.loop_start()
+
 
 class RegisterDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -132,12 +154,12 @@ class ClientApp(QMainWindow):
         text.setAlignment(Qt.AlignCenter)
         text.setText("ONE-TIME PASSWORD")
 
-        password = QLabel()
-        password.setAlignment(Qt.AlignCenter)
-        font = password.font()
+        self.password = QLabel()
+        self.password.setAlignment(Qt.AlignCenter)
+        font = self.password.font()
         font.setPointSize(20)
-        password.setFont(font)
-        password.setText("1234")
+        self.password.setFont(font)
+        self.password.setText("____")
 
         register_button = QPushButton("Register new card")
         register_button.clicked.connect(self.register_button_callback)
@@ -150,7 +172,7 @@ class ClientApp(QMainWindow):
 
         layout = QVBoxLayout()
         layout.addWidget(text)
-        layout.addWidget(password)
+        layout.addWidget(self.password)
         layout.addWidget(register_button)
         layout.addWidget(activation_button)
 
@@ -169,6 +191,7 @@ class ClientApp(QMainWindow):
     def activation_button_callback(self):
         activation_dialog = ActivationDialog(self)
         activation_dialog.exec()
+
 
 
 app = QApplication(sys.argv)

@@ -66,21 +66,7 @@ int main() {
 
 	GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_5);
 	GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_5, GPIO_PIN_5);
-
-	SSIDisable(SSI2_BASE);
-
-	SSIConfigSetExpClk(SSI2_BASE, 
-						SysCtlClockGet(), 
-						SSI_FRF_MOTO_MODE_0,
-						SSI_MODE_MASTER,
-						1000000,
-						8);
-	SSIEnable(SSI2_BASE);
 	///////////////////////////////////////////////////////////////////////////
-
-	// clear FIFO of SSI2
-	uint32_t tmp;
-	while (SSIDataGetNonBlocking(SSI2_BASE, &tmp));
 
     //  Enable Global Interrupts
     IntMasterEnable();
@@ -113,11 +99,12 @@ int main() {
     keypad_setColumns(c1, c2, c3);
     ///////////////////////////////////////////////////////////////////////////
 
+    PortPin_t SS = {.base=GPIO_PORTB_BASE, .pin=GPIO_PIN_5};
+    PortPin_t RST = {.base=GPIO_PORTB_BASE, .pin=GPIO_PIN_0};
+
 	tiva_mfrc522_init(	/* SPI module = */ SSI2_BASE,
-						/* SS port = */ GPIO_PORTB_BASE,
-						/* SS pin = */ GPIO_PIN_5,
-						/* RST port = */ GPIO_PORTB_BASE, 
-						/* RST pin = */ GPIO_PIN_0);
+						/* SS = */ SS,
+                        /* RST = */ RST);
 
 	///////////////////////////////////////////////////////////////////////////
     Message_t data[8];

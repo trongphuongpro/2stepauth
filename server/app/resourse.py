@@ -3,12 +3,25 @@ import hashlib
 from .models import User
 from . import database
 from . import routes
-
+import paho.mqtt.client as paho
 import numpy as np
 
 # initialize database and tables
 database.create_all()
 currentUser = None
+
+
+def on_connect_callback(client, userdata, flags, rc):
+    print("CONNACK received with code {}.".format(rc))
+
+# initialize MQTT client
+client = paho.Client("processing_center")
+
+client.on_connect = on_connect_callback
+
+client.connect("test.mosquitto.org", 1883)
+client.loop_start()
+
 
 class UserInfoAPI(Resource):
     def __init__(self):
@@ -92,7 +105,9 @@ class UserCardIdAPI(Resource):
                 if result is None:
                     return 0
                 else:
-                    return np.random.randint(1000, 9999)
+                    pwd = np.random.randint(1000, 9999)
+                    client.publish("onetimepwd", str(pwd), qos=2)
+                    return pwd
             
             except Exception as e:
                 print(e)
